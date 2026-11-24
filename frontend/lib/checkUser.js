@@ -40,7 +40,8 @@ export const checkUser = async () => {
     const existingContentType = existingUserResponse.headers.get("content-type");
     if (!existingUserResponse.ok || !existingContentType?.includes("application/json")) {
       console.error(
-        `❌ Strapi error: status ${existingUserResponse.status} on /api/users`
+        `❌ Strapi GET /api/users failed: ${existingUserResponse.status}`,
+        await existingUserResponse.text()
       );
       return { error: "CMS_UNAVAILABLE" };
     }
@@ -155,7 +156,8 @@ export const checkUser = async () => {
     const newUserContentType = newUserResponse.headers.get("content-type");
     if (!newUserResponse.ok || !newUserContentType?.includes("application/json")) {
       console.error(
-        `❌ Strapi error: status ${newUserResponse.status} on /api/users`
+        `❌ Strapi POST /api/users failed: ${newUserResponse.status}`,
+        await newUserResponse.text()
       );
       return { error: "CMS_UNAVAILABLE" };
     }
