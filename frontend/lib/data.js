@@ -1,4 +1,3 @@
-
 import { Camera, BookOpen, ChefHat, Search } from "lucide-react";
 
 export const SITE_STATS = [

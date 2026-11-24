@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
@@ -393,62 +392,38 @@ function RecipeContent() {
                     lockText="Nutrition info is Pro-only"
                   >
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="bg-orange-50 p-2 text-center border-2 border-orange-100 flex flex-col justify-center items-center h-28">
-                        <div
-                          className={`${
-                            recipe.nutrition.calories?.toString().length > 8
-                              ? "text-sm"
-                              : "text-2xl"
-                          } font-bold text-orange-600 leading-tight`}
-                        >
+                      <div className="bg-orange-50 p-3 text-center border-2 border-orange-100">
+                        <div className="text-2xl font-bold text-orange-600">
                           {recipe.nutrition.calories}
                         </div>
-                        <div className="text-[10px] text-stone-500 font-bold uppercase tracking-wide mt-1">
+                        <div className="text-xs text-stone-500 font-bold uppercase tracking-wide">
                           Calories
                         </div>
                       </div>
 
-                      <div className="bg-stone-50 p-2 text-center border-2 border-stone-100 flex flex-col justify-center items-center h-28">
-                        <div
-                          className={`${
-                            recipe.nutrition.protein?.toString().length > 8
-                              ? "text-sm"
-                              : "text-2xl"
-                          } font-bold text-stone-900 leading-tight`}
-                        >
+                      <div className="bg-stone-50 p-3 text-center border-2 border-stone-100">
+                        <div className="text-2xl font-bold text-stone-900">
                           {recipe.nutrition.protein}
                         </div>
-                        <div className="text-[10px] text-stone-500 font-bold uppercase tracking-wide mt-1">
+                        <div className="text-xs text-stone-500 font-bold uppercase tracking-wide">
                           Protein
                         </div>
                       </div>
 
-                      <div className="bg-stone-50 p-2 text-center border-2 border-stone-100 flex flex-col justify-center items-center h-28">
-                        <div
-                          className={`${
-                            recipe.nutrition.carbs?.toString().length > 8
-                              ? "text-sm"
-                              : "text-2xl"
-                          } font-bold text-stone-900 leading-tight`}
-                        >
+                      <div className="bg-stone-50 p-3 text-center border-2 border-stone-100">
+                        <div className="text-2xl font-bold text-stone-900">
                           {recipe.nutrition.carbs}
                         </div>
-                        <div className="text-[10px] text-stone-500 font-bold uppercase tracking-wide mt-1">
+                        <div className="text-xs text-stone-500 font-bold uppercase tracking-wide">
                           Carbs
                         </div>
                       </div>
 
-                      <div className="bg-stone-50 p-2 text-center border-2 border-stone-100 flex flex-col justify-center items-center h-28">
-                        <div
-                          className={`${
-                            recipe.nutrition.fat?.toString().length > 8
-                              ? "text-sm"
-                              : "text-2xl"
-                          } font-bold text-stone-900 leading-tight`}
-                        >
+                      <div className="bg-stone-50 p-3 text-center border-2 border-stone-100">
+                        <div className="text-2xl font-bold text-stone-900">
                           {recipe.nutrition.fat}
                         </div>
-                        <div className="text-[10px] text-stone-500 font-bold uppercase tracking-wide mt-1">
+                        <div className="text-xs text-stone-500 font-bold uppercase tracking-wide">
                           Fat
                         </div>
                       </div>

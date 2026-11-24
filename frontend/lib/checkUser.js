@@ -13,8 +13,8 @@ export const checkUser = async () => {
   }
 
   if (!STRAPI_API_TOKEN) {
-    console.error("❌ STRAPI_API_TOKEN is missing in .env.local");
-    return null;
+    console.error("❌ STRAPI_API_TOKEN is missing in environment variables");
+    return { error: "CMS_UNAVAILABLE" };
   }
 
   // Check if user has Pro plan
@@ -23,60 +23,99 @@ export const checkUser = async () => {
 
   try {
     // Check if user exists in Strapi
-    const existingUserResponse = await fetch(
-      `${STRAPI_URL}/api/users?filters[clerkId][$eq]=${user.id}`,
-      {
+    const userUrl = `${STRAPI_URL}/api/users?filters[clerkId][$eq]=${user.id}`;
+    let existingUserResponse;
+    try {
+      existingUserResponse = await fetch(userUrl, {
         headers: {
           Authorization: `Bearer ${STRAPI_API_TOKEN}`,
         },
         cache: "no-store",
-      }
-    );
+      });
+    } catch (fetchErr) {
+      console.error(`❌ Strapi fetch error on /api/users:`, fetchErr.message);
+      return { error: "CMS_UNAVAILABLE" };
+    }
 
-    if (!existingUserResponse.ok) {
-      const errorText = await existingUserResponse.text();
-      console.error("Strapi error response:", errorText);
-      return null;
+    const existingContentType = existingUserResponse.headers.get("content-type");
+    if (!existingUserResponse.ok || !existingContentType?.includes("application/json")) {
+      console.error(
+        `❌ Strapi error: status ${existingUserResponse.status} on /api/users`
+      );
+      return { error: "CMS_UNAVAILABLE" };
     }
 
     const existingUserData = await existingUserResponse.json();
 
-    if (existingUserData.length > 0) {
+    if (Array.isArray(existingUserData) && existingUserData.length > 0) {
       const existingUser = existingUserData[0];
 
       // Update subscription tier if changed
       if (existingUser.subscriptionTier !== subscriptionTier) {
-        await fetch(`${STRAPI_URL}/api/users/${existingUser.id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${STRAPI_API_TOKEN}`,
-          },
-          body: JSON.stringify({ subscriptionTier }),
-        });
+        try {
+          const updateResponse = await fetch(
+            `${STRAPI_URL}/api/users/${existingUser.id}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${STRAPI_API_TOKEN}`,
+              },
+              body: JSON.stringify({ subscriptionTier }),
+            }
+          );
+
+          if (!updateResponse.ok) {
+            console.error(
+              `❌ Strapi error: status ${updateResponse.status} on /api/users/${existingUser.id}`
+            );
+          }
+        } catch (updateErr) {
+          console.error(
+            `❌ Error updating subscription tier on /api/users/${existingUser.id}:`,
+            updateErr.message
+          );
+        }
       }
 
       return { ...existingUser, subscriptionTier };
     }
 
     // Get authenticated role
-    const rolesResponse = await fetch(
-      `${STRAPI_URL}/api/users-permissions/roles`,
-      {
-        headers: {
-          Authorization: `Bearer ${STRAPI_API_TOKEN}`,
-        },
-      }
-    );
+    let rolesResponse;
+    try {
+      rolesResponse = await fetch(
+        `${STRAPI_URL}/api/users-permissions/roles`,
+        {
+          headers: {
+            Authorization: `Bearer ${STRAPI_API_TOKEN}`,
+          },
+        }
+      );
+    } catch (rolesErr) {
+      console.error(
+        `❌ Strapi fetch error on /api/users-permissions/roles:`,
+        rolesErr.message
+      );
+      return { error: "CMS_UNAVAILABLE" };
+    }
+
+    const rolesContentType = rolesResponse.headers.get("content-type");
+    if (!rolesResponse.ok || !rolesContentType?.includes("application/json")) {
+      console.error(
+        `❌ Strapi error: status ${rolesResponse.status} on /api/users-permissions/roles`
+      );
+      return { error: "CMS_UNAVAILABLE" };
+    }
 
     const rolesData = await rolesResponse.json();
-    const authenticatedRole = rolesData.roles.find(
+    const authenticatedRole = rolesData?.roles?.find(
       (role) => role.type === "authenticated"
     );
 
     if (!authenticatedRole) {
-      console.error("❌ Authenticated role not found");
-      return null;
+      console.error("❌ Authenticated role not found in Strapi");
+      return { error: "CMS_UNAVAILABLE" };
     }
 
     // Create new user
@@ -95,25 +134,36 @@ export const checkUser = async () => {
       subscriptionTier,
     };
 
-    const newUserResponse = await fetch(`${STRAPI_URL}/api/users`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${STRAPI_API_TOKEN}`,
-      },
-      body: JSON.stringify(userData),
-    });
+    let newUserResponse;
+    try {
+      newUserResponse = await fetch(`${STRAPI_URL}/api/users`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${STRAPI_API_TOKEN}`,
+        },
+        body: JSON.stringify(userData),
+      });
+    } catch (newUserErr) {
+      console.error(
+        `❌ Strapi fetch error on /api/users (POST):`,
+        newUserErr.message
+      );
+      return { error: "CMS_UNAVAILABLE" };
+    }
 
-    if (!newUserResponse.ok) {
-      const errorText = await newUserResponse.text();
-      console.error("❌ Error creating user:", errorText);
-      return null;
+    const newUserContentType = newUserResponse.headers.get("content-type");
+    if (!newUserResponse.ok || !newUserContentType?.includes("application/json")) {
+      console.error(
+        `❌ Strapi error: status ${newUserResponse.status} on /api/users`
+      );
+      return { error: "CMS_UNAVAILABLE" };
     }
 
     const newUser = await newUserResponse.json();
     return newUser;
   } catch (error) {
-    console.error("❌ Error in checkUser:", error.message);
-    return null;
+    console.error("❌ Error in checkUser connecting to Strapi:", error.message);
+    return { error: "CMS_UNAVAILABLE" };
   }
 };

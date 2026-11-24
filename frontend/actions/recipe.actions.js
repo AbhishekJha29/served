@@ -67,6 +67,9 @@ async function fetchRecipeImage(recipeName) {
 export async function getOrGenerateRecipe(formData) {
   try {
     const user = await checkUser();
+    if (user?.error === "CMS_UNAVAILABLE") {
+      return { success: false, error: "Service temporarily unavailable" };
+    }
     if (!user) {
       throw new Error("User not authenticated");
     }
@@ -341,6 +344,9 @@ Guidelines:
 export async function saveRecipeToCollection(formData) {
   try {
     const user = await checkUser();
+    if (user?.error === "CMS_UNAVAILABLE") {
+      return { success: false, error: "Service temporarily unavailable" };
+    }
     if (!user) {
       throw new Error("User not authenticated");
     }
@@ -413,6 +419,9 @@ export async function saveRecipeToCollection(formData) {
 export async function removeRecipeFromCollection(formData) {
   try {
     const user = await checkUser();
+    if (user?.error === "CMS_UNAVAILABLE") {
+      return { success: false, error: "Service temporarily unavailable" };
+    }
     if (!user) {
       throw new Error("User not authenticated");
     }
@@ -478,6 +487,9 @@ export async function removeRecipeFromCollection(formData) {
 export async function getRecipesByPantryIngredients() {
   try {
     const user = await checkUser();
+    if (user?.error === "CMS_UNAVAILABLE") {
+      return { success: false, error: "Service temporarily unavailable" };
+    }
     if (!user) {
       throw new Error("User not authenticated");
     }
@@ -597,6 +609,9 @@ Rules:
 export async function getSavedRecipes() {
   try {
     const user = await checkUser();
+    if (user?.error === "CMS_UNAVAILABLE") {
+      return { success: false, error: "Service temporarily unavailable" };
+    }
     if (!user) {
       throw new Error("User not authenticated");
     }

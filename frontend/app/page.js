@@ -1,26 +1,31 @@
-import PricingSection from "@/components/PricingSection";
-import { Badge } from "@/components/ui/badge";
+import React from "react";
+import { ArrowRight, Star, Flame, Clock, Users } from "lucide-react";
+import Image from "next/image";
+import { SignUpButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { FEATURES, HOW_IT_WORKS_STEPS, SITE_STATS } from "@/lib/data";
-import { auth, currentUser } from "@clerk/nextjs/server";
-import { ArrowRight, Clock, Flame, Star, Users } from "lucide-react";
-import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
+import { auth } from "@clerk/nextjs/server";
+import { SITE_STATS, FEATURES, HOW_IT_WORKS_STEPS } from "@/lib/data";
+import PricingSection from "@/components/PricingSection";
 import Link from "next/link";
 
-export default async function Home() {
+export default async function LandingPage() {
   const { has } = await auth();
-  const user = await currentUser();
-  const subscriptionTier = (has({ role: "pro" }) || user?.publicMetadata?.role === "pro" || user?.publicMetadata?.plan === "pro") ? "pro" : "free";
+  const subscriptionTier = has({ plan: "pro" }) ? "pro" : "free";
+
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900">
+      {/* Hero Section */}
       <section className="pt-32 pb-20 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center gap-12 md:gap-20">
-
-            {/* Text Container */}
+            {/* Text Content */}
             <div className="flex-1 text-center md:text-left">
-              <Badge variant="outline" className="border-2 border-orange-600 text-orange-700 bg-orange-50 text-sm font-bold mb-6 uppercase tracking-wide">
+              <Badge
+                variant="outline"
+                className="border-2 border-orange-600 text-orange-700 bg-orange-50 text-sm font-bold mb-6 uppercase tracking-wide"
+              >
                 <Flame className="mr-1" />
                 #1 AI Cooking Assistant
               </Badge>
@@ -28,7 +33,7 @@ export default async function Home() {
               <h1 className="text-6xl md:text-8xl font-bold mb-6 leading-[0.9] tracking-tight">
                 Turn your{" "}
                 <span className="italic underline decoration-4 decoration-orange-600">
-                  Leftovers
+                  leftovers
                 </span>{" "}
                 into <br />
                 masterpieces.
@@ -39,7 +44,7 @@ export default async function Home() {
                 Save money, reduce waste, and eat better tonight.
               </p>
 
-              <Link href={'/dashboard'}>
+              <Link href="/dashboard">
                 <Button
                   size="xl"
                   variant="primary"
@@ -55,14 +60,17 @@ export default async function Home() {
               </p>
             </div>
 
+            {/* Hero Image */}
             <Card className="relative aspect-square md:aspect-4/5 border-4 border-stone-900 bg-stone-200 overflow-hidden py-0">
-            <Image
+              <Image
                 src="/pasta-dish.png"
                 alt="Delicious pasta dish"
                 width={500}
                 height={500}
                 className="w-full h-full object-cover"
               />
+
+              {/* Floating Card */}
               <Card className="absolute bottom-8 left-8 right-8 bg-white/95 backdrop-blur-sm border-2 border-stone-900 py-0">
                 <CardContent className="p-4">
                   <div className="flex justify-between items-start mb-2">
@@ -101,6 +109,7 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Stats Bar */}
       <section className="py-12 border-y-2 border-stone-900 bg-stone-900">
         <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center px-4">
           {SITE_STATS.map((stat, i) => (

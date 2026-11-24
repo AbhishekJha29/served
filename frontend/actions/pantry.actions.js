@@ -134,66 +134,41 @@ export async function saveToPantry(formData) {
     }
 
     const ingredientsJson = formData.get("ingredients");
-    let ingredients = JSON.parse(ingredientsJson);
+    const ingredients = JSON.parse(ingredientsJson);
 
-    // Handle case where Gemini might wrap ingredients in an object
-    if (!Array.isArray(ingredients) && ingredients.ingredients) {
-      ingredients = ingredients.ingredients;
-    }
-
-    if (!Array.isArray(ingredients) || ingredients.length === 0) {
+    if (!ingredients || ingredients.length === 0) {
       throw new Error("No ingredients to save");
     }
 
     // Create pantry items in Strapi
     const savedItems = [];
-    const errors = [];
-
-    // Use Promise.all for faster saving, but limit concurrency if needed
-    // For now, sequential is safer for debugging but slower
     for (const ingredient of ingredients) {
-      try {
-        const response = await fetch(`${STRAPI_URL}/api/pantry-items`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${STRAPI_API_TOKEN}`,
+      const response = await fetch(`${STRAPI_URL}/api/pantry-items`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${STRAPI_API_TOKEN}`,
+        },
+        body: JSON.stringify({
+          data: {
+            name: ingredient.name,
+            quantity: ingredient.quantity,
+            imageUrl: "",
+            owner: user.id,
           },
-          body: JSON.stringify({
-            data: {
-              name: ingredient.name,
-              quantity: ingredient.quantity || "",
-              owner: user.id,
-              publishedAt: new Date().toISOString(), // Use ISO string for Strapi
-            },
-          }),
-        });
+        }),
+      });
 
-        if (response.ok) {
-          const data = await response.json();
-          // In Strapi 5, the response might be { data: { id, ... } }
-          savedItems.push(data.data);
-        } else {
-          const errorText = await response.text();
-          console.error(`Failed to save ${ingredient.name}:`, errorText);
-          errors.push(ingredient.name);
-        }
-      } catch (err) {
-        console.error(`Error saving ${ingredient.name}:`, err);
-        errors.push(ingredient.name);
+      if (response.ok) {
+        const data = await response.json();
+        savedItems.push(data.data);
       }
-    }
-
-    if (savedItems.length === 0 && ingredients.length > 0) {
-      throw new Error("Failed to save items to pantry. Please try again.");
     }
 
     return {
       success: true,
       savedItems,
-      message: `Saved ${savedItems.length} items to your pantry!${
-        errors.length > 0 ? ` (${errors.length} items failed)` : ""
-      }`,
+      message: `Saved ${savedItems.length} items to your pantry!`,
     };
   } catch (error) {
     console.error("Error saving to pantry:", error);
@@ -226,8 +201,8 @@ export async function addPantryItemManually(formData) {
         data: {
           name: name.trim(),
           quantity: quantity.trim(),
+          imageUrl: "",
           owner: user.id,
-          publishedAt: new Date().toISOString(), // Use ISO string for Strapi
         },
       }),
     });

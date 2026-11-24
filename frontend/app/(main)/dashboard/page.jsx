@@ -19,11 +19,7 @@ export default async function DashboardPage() {
 
   const recipeOfTheDay = recipeData?.recipe;
   const categories = categoriesData?.categories || [];
-  
-  // Deduplicate areas as some might be returned multiple times by the API
-  const areas = Array.from(
-    new Map((areasData?.areas || []).map((area) => [area.strArea, area])).values()
-  );
+  const areas = areasData?.areas || [];
 
   return (
     <div className="min-h-screen bg-stone-50 py-16 px-4">

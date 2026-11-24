@@ -1,8 +1,6 @@
-"use client";
-
 import React from "react";
 import { Check } from "lucide-react";
-import { SignInButton, useUser } from "@clerk/nextjs";
+import { Show, SignInButton } from "@clerk/nextjs";
 import { CheckoutButton } from "@clerk/nextjs/experimental";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,8 +15,6 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
 export default function PricingSection({ subscriptionTier = "free" }) {
-  const { isSignedIn } = useUser();
-
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-16">
@@ -58,7 +54,7 @@ export default function PricingSection({ subscriptionTier = "free" }) {
             </ul>
           </CardContent>
 
-          <CardFooter className="mt-auto">
+          <CardFooter className={"mt-auto"}>
             <Link href="/dashboard" className="w-full">
               <Button
                 variant="outline"
@@ -110,9 +106,9 @@ export default function PricingSection({ subscriptionTier = "free" }) {
           </CardContent>
 
           <CardFooter>
-            {isSignedIn ? (
+            <Show when="signed-in">
               <CheckoutButton
-                planId={process.env.NEXT_PUBLIC_CLERK_PRO_PLAN_ID}
+                planId="cplan_37y5uChZ9uYauQyTlDkXDh997ht"
                 planPeriod="month"
                 newSubscriptionRedirectUrl="/dashboard"
                 checkoutProps={{
@@ -132,13 +128,14 @@ export default function PricingSection({ subscriptionTier = "free" }) {
                   {subscriptionTier === "pro" ? "Subscribed" : "Subscribe Now"}
                 </Button>
               </CheckoutButton>
-            ) : (
+            </Show>
+            <Show when="signed-out">
               <SignInButton mode="modal">
                 <Button variant="primary" className="w-full">
                   Login to Subscribe
                 </Button>
               </SignInButton>
-            )}
+            </Show>
           </CardFooter>
         </Card>
       </div>
